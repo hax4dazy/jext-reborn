@@ -82,48 +82,21 @@
 	<svelte:fragment slot="sidebarLeft">
 		<AppRail hover="bg-tertiary-hover-token">
 			<AppRailAnchor href="{base}/">
-				<div
-					class="flex"
-					use:popup={{
-						event: 'hover',
-						placement: 'right',
-						target: 'generator'
-					}}
-				>
-					<img
-						src={default_disc}
-						alt="Custom disc generator"
-						class="h-full w-full p-2 pointer-events-none"
-					/>
-				</div>
+				<img
+					src={default_disc}
+					alt="Custom disc generator"
+					class="h-full w-full p-2 pointer-events-none"
+				/>
 			</AppRailAnchor>
 			<AppRailAnchor href="{base}/config">
-				<div
-					class="flex"
-					use:popup={{
-						event: 'hover',
-						placement: 'right',
-						target: 'configurator'
-					}}
-				>
-					<img src={cog} alt="Plugin configurator" class="h-full w-full p-2 pointer-events-none" />
-				</div>
+				<img src={cog} alt="Plugin configurator" class="h-full w-full p-2 pointer-events-none" />
 			</AppRailAnchor>
 			<AppRailAnchor href="{base}/documentation">
-				<div
-					class="flex"
-					use:popup={{
-						event: 'hover',
-						placement: 'right',
-						target: 'documentation'
-					}}
-				>
-					<img
-						src={knowledge_book}
-						alt="Documentation"
-						class="h-full w-full p-2 pointer-events-none"
-					/>
-				</div>
+				<img
+					src={knowledge_book}
+					alt="Documentation"
+					class="h-full w-full p-2 pointer-events-none"
+				/>
 			</AppRailAnchor>
 
 			<svelte:fragment slot="trail">
@@ -142,20 +115,3 @@
 	</svelte:fragment>
 	<slot />
 </AppShell>
-
-<!-- Popups -->
-
-<div class="card p-1 variant-filled-primary" data-popup="generator">
-	<p>Custom disc generator</p>
-	<div class="arrow variant-filled-primary" />
-</div>
-
-<div class="card p-1 variant-filled-primary" data-popup="configurator">
-	<p>Plugin configurator</p>
-	<div class="arrow variant-filled-primary" />
-</div>
-
-<div class="card p-1 variant-filled-primary" data-popup="documentation">
-	<p>Documentation</p>
-	<div class="arrow variant-filled-primary" />
-</div>

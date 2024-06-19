@@ -32,8 +32,9 @@ export const load: LayoutLoad = async ({ url, fetch }) => {
 				store.icon = blob;
 				return store;
 			});
-		}))();
-
+		})
+	)();
+	
 	return {
 		server: {
 			connect,

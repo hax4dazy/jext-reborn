@@ -16,6 +16,10 @@ export { default as panorama_2 } from './panorama_2.webp';
 export { default as panorama_3 } from './panorama_3.webp';
 export { default as panorama_4 } from './panorama_4.webp';
 export { default as panorama_5 } from './panorama_5.webp';
+export { default as low_brush } from './low_brush.webp';
+export { default as low_chest } from './low_chest.webp';
+export { default as low_trial } from './low_trial.webp';
+export { default as low_pot } from './low_pot.webp';
 export { default as button } from './button.webp';
 export { default as cog } from './cog.webp';
 

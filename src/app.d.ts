@@ -10,20 +10,6 @@ declare namespace App {
 
 /// <reference types="svelte-gestures" />
 
-// extend Console
-
-interface Console {
-	logs: {
-		type: string;
-		datetime: string;
-		value: any[];
-	}[];
-	defaultLog: (...data: any[]) => void;
-	defaultError: (...data: any[]) => void;
-	defaultWarn: (...data: any[]) => void;
-	defaultDebug: (...data: any[]) => void;
-}
-
 interface ObjectConstructor {
 	mergeDeep: (...objects: any[]) => any;
 }

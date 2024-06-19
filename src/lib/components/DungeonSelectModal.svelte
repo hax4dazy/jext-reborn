@@ -1,41 +1,60 @@
-<!-- This is extremely messy, but I'm too lazy to rewrite this -->
 <script lang="ts">
 	import { TabGroup, Tab, ProgressRadial, getModalStore } from '@skeletonlabs/skeleton';
-	import { onDestroy } from 'svelte';
-
-	import { loottables } from '../';
+	import { groups, lootTables, type Loottable } from '../';
 
 	import { base } from '$app/paths';
 
 	const modalStore = getModalStore();
 
-	export let source: string = 'chests/*';
-	export let defaultValue = 2;
-	export let isChance: boolean = false;
-	export let isBoolean: boolean = false;
+	export let filter = '';
+	export let baseValue = 0;
+
+	const items = filter != '' ? lootTables.filter((item) => item.group === filter) : lootTables;
 
 	export let value: {
 		[key: string]: number;
 	} = {};
 
-	const items = loottables[source];
+	let flag = false;
+
+	items.forEach(item => {
+		item.contents.forEach(content => {
+			if (!value[content]) {
+				value[content] = baseValue;
+			}
+		});
+	});
+
+	const keyToGroup = (key: string) => {
+		const item = lootTables.find((item) => item.contents.includes(key));
+		return item!;
+	};
+
+	const getPercentage = (value: number, group: Loottable) => {
+		if(group.mode == 'percentage') {
+			return value / 10;
+		} else {
+			return Math.round((value / ((group.defaultLoottableWeight! + value) * (1 - (group.ignorePercentage ?? 0)))) * 1000) / 10;
+		}
+	}
 
 	let tabSet: number = 0;
 
-	for (const [_, val] of Object.entries(items)) {
-		val.contents.forEach((item) => {
-			if (!value[item]) {
-				value[item] = defaultValue;
+	const exit = () => {
+		if ($modalStore[0]) {
+			// clone value and remove each element with default value
+			const parsedValue = { ...value };
+
+			for (const [key, val] of Object.entries(parsedValue)) {
+				if (val === baseValue) {
+					delete parsedValue[key];
+				}
 			}
-		});
-	}
 
-	let cleanUp: string;
-	let flag = false;
-
-	onDestroy(() => {
-		URL.revokeObjectURL(cleanUp);
-	});
+			$modalStore[0]!.response!(parsedValue);
+			modalStore.close();
+		}
+	};
 
 	const update = (e: Event) => {
 		const target = e.target as HTMLInputElement;
@@ -57,74 +76,31 @@
 		if (type === 'group') {
 			const group = target.getAttribute('data-target') ?? '';
 
-			const elements = items[group].contents;
+			const elements = items.filter((item) => group === `${item.displayName}-${item.subtitle}`)[0].contents;
 
 			elements.forEach((item) => {
 				value[item] = parseInt(target.value);
 			});
-		} else {
-			const item = target.getAttribute('data-target') ?? '';
-
-			value[item] = parseInt(target.value);
 		}
 
 		flag = !flag;
 	};
 
-	const updateBoolean = (e: Event) => {
-		const target = e.target as HTMLInputElement;
-
-		const type = target.getAttribute('data-type');
-		const itemOrGroup = target.getAttribute('data-target') ?? '';
-
-		if (type === 'group') {
-			const elements = items[itemOrGroup].contents;
-
-			if (elements.every((item) => value[item] === value[elements[0]])) {
-				elements.forEach((item) => {
-					value[item] = value[item] == 0 ? 1 : 0;
-				});
-			} else {
-				elements.forEach((item) => {
-					value[item] = value[elements[0]];
-				});
-			}
-		} else {
-			value[itemOrGroup] = value[itemOrGroup] == 0 ? 1 : 0;
-		}
-	};
-
-	const getImage = async (item: string) => {
-		const response = fetch(`${base}/${item}`);
-		const blob = await response.then((res) => res.blob());
-
-		cleanUp = URL.createObjectURL(blob);
-
-		return cleanUp;
-	};
-
-	const getGroupValue = (group: string): string => {
-		const elements = items[group].contents;
+	const getGroupValue = (group: Loottable): string => {
+		const elements = items.filter((item) =>  `${item.displayName}-${item.subtitle}` === `${group.displayName}-${group.subtitle}`)[0].contents;
 
 		return elements.every((item) => value[item] === value[elements[0]])
 			? value[elements[0]].toString()
 			: '';
 	};
 
-	const exit = () => {
-		if ($modalStore[0]) {
-			// clone value and remove each element with default value
-			const parsedValue = { ...value };
+	const getImage = async (item: string) => {
+		const response = fetch(`${base}/${item}`);
+		const blob = await response.then((res) => res.blob());
 
-			for (const [key, val] of Object.entries(parsedValue)) {
-				if (val === defaultValue) {
-					delete parsedValue[key];
-				}
-			}
+		const url = URL.createObjectURL(blob);
 
-			$modalStore[0]!.response!(parsedValue);
-			modalStore.close();
-		}
+		return url;
 	};
 </script>
 
@@ -136,133 +112,74 @@
 		<svelte:fragment slot="panel">
 			{#if tabSet === 0}
 				<div class="grid sm:grid-cols-4 p-2 gap-2">
-					{#each Object.entries(items) as [key, val]}
-						{#if isBoolean}
-							<button
-								class="card rounded-lg flex flex-col justify-between [&>*]:pointer-events-none outline-none {value &&
-								+getGroupValue(key) > 0
-									? 'variant-filled-tertiary'
-									: ''}"
-								data-type="group"
-								data-target={key}
-								on:click={updateBoolean}
-							>
-								<header class="card-header flex items-center justify-center w-full aspect-[9/10]">
-									{#await getImage(val.img)}
-										<ProgressRadial />
-									{:then url}
-										<img src={url} alt="dungeon" class="w-full" />
-									{/await}
-								</header>
-								<section class="p-4 w-full">
-									<h3 class="h4 text-center w-full">{key}</h3>
-								</section>
-							</button>
-						{:else}
-							<div class="card rounded-lg flex flex-col justify-between">
-								<header class="card-header flex items-center justify-center w-full aspect-[9/10]">
-									{#await getImage(val.img)}
-										<ProgressRadial />
-									{:then url}
-										<img src={url} alt="dungeon" class="w-full" />
-									{/await}
-								</header>
-								<section class="p-4 w-full">
-									<h3 class="h4 text-center w-full">{key}</h3>
-								</section>
-								<footer class="card-footer">
-									{#if isChance}
-										<div class="input appearance-none flex items-center">
-											<input
-												type="number"
-												class="input text-left appearance-none outline-none"
-												min="-1"
-												max="1000"
-												data-type="group"
-												data-target={key}
-												on:input={update}
-												placeholder="-"
-												value={+getGroupValue(key)}
-											/>
-											{#key flag}
-												<span class="text-sm mx-2">
-													{+getGroupValue(key) / 10}%
-												</span>
-											{/key}
-										</div>
-									{:else}
-										<input
-											type="number"
-											class="input text-center appearance-none"
-											min="-1"
-											max="12"
-											data-type="group"
-											data-target={key}
-											on:input={update}
-											placeholder="-"
-											value={getGroupValue(key)}
-										/>
-									{/if}
-								</footer>
-							</div>
-						{/if}
+					{#each items as item}
+						<div class="card rounded-lg flex flex-col justify-between">
+							<header class="card-header flex items-center justify-center w-full aspect-[9/10]">
+								{#await getImage(item.img)}
+									<ProgressRadial />
+								{:then url}
+									<img src={url} alt="dungeon" class="w-full" />
+									<!-- small icon in corner of image -->
+									<img src={groups[item.group]} alt="group" class="self-end -ml-8 w-8 h-8" />
+								{/await}
+							</header>
+							<section class="p-4 w-full">
+								<h4 class="h4 text-center w-full">{item.displayName}</h4>
+								{#if item.subtitle}
+									<h5 class="h6 text-sm text-center w-full">
+										{item.subtitle}
+									</h5>
+								{/if}
+								
+							</section>
+							<footer class="card-footer">
+								<div class="input appearance-none flex items-center">
+									<input
+										type="number"
+										class="input text-left appearance-none outline-none"
+										min="-1"
+										max="1000"
+										data-type="group"
+										data-target="{item.displayName}-{item.subtitle}"
+										on:input={update}
+										placeholder="-"
+										value={+getGroupValue(item)}
+									/>
+									{#key flag}
+										<span class="text-sm mx-2">
+											{getPercentage(+getGroupValue(item), item)}%
+										</span>
+									{/key}
+								</div>
+							</footer>
+						</div>
 					{/each}
 				</div>
 			{:else if tabSet === 1}
-				<div class=" h-full grid grid-cols-1 sm:grid-cols-2">
-					<h3 class="h3 hidden sm:flex text-center w-full">Loot table</h3>
-					<h3 class="h3 hidden sm:flex w-full">
-						{isChance ? 'Disc chance to be found' : 'Max. number of discs'}
+				<div class="h-full grid grid-cols-1 sm:grid-cols-3 p-4">
+					<h3 class="h3 hidden sm:flex text-center w-full col-span-1 sm:col-span-2 items-center justify-center border border-gray-50">Loot table</h3>
+					<h3 class="h3 hidden sm:flex w-full items-center justify-center text-center border border-gray-50 h-full">
+						Disc chance to be found
 					</h3>
-					<div class="hidden sm:flex mb-4" />
-					<div />
+					<div class="h3 hidden sm:flex mb-4 col-span-3" />
 
 					{#each Object.entries(value) as [key, val]}
-						<h5 class="h5">{key}</h5>
-						{#if isBoolean}
-							<div class="flex items-center">
-								<input
-									type="checkbox"
-									class="checkbox aspect-square"
-									data-type="item"
-									data-target={key}
-									on:change={updateBoolean}
-									checked={val === 1}
-								/>
-								<span class="text-sm mx-2">Enabled</span>
-							</div>
-						{:else if isChance}
-							<div class="input appearance-none flex items-center">
-								<input
-									type="number"
-									class="input"
-									min="0"
-									max="1000"
-									value={val}
-									data-type="item"
-									data-target={key}
-									on:input={update}
-									placeholder="0"
-								/>
-								{#key flag}
-									<span class="text-sm mx-2">
-										{val / 10}%
-									</span>
-								{/key}
-							</div>
-						{:else}
+						<h5 class="h5 p-2 sm:border-b sm:border-gray-600 col-span-1 sm:col-span-2">{key}</h5>
+						<div class="input appearance-none flex items-baseline">
 							<input
 								type="number"
 								class="input"
 								min="0"
-								max="12"
-								value={val}
+								max="1000"
 								data-type="item"
 								data-target={key}
-								on:input={update}
-								placeholder="2"
+								bind:value={value[key]}
+								placeholder="0"
 							/>
-						{/if}
+							<span class="text-sm mx-2">
+								{getPercentage(value[key], keyToGroup(key))}%
+							</span>
+						</div>
 					{/each}
 				</div>
 			{/if}

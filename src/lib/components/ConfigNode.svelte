@@ -34,8 +34,8 @@
 		const modalComponent: ModalComponent = {
 			ref: DungeonSelectModal,
 			props: {
-				source: node.enumValues as string,
-				defaultValue: node.id == 'disc-loottables-limit' ? 2 : 3,
+				filter: node.enumValues as string,
+				baseValue: node.id == 'disc-loottables-limit' ? 2 : 3,
 				value: node.value
 			}
 		};

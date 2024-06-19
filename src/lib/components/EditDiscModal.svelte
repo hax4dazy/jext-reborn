@@ -158,40 +158,8 @@
 		const modalComponent: ModalComponent = {
 			ref: DungeonSelectModal,
 			props: {
-				source: 'chests/*',
 				defaultValue: 0,
 				value: isFragment ? tempDisc['fragment-loot-tables'].value : tempDisc['loot-tables'].value,
-				isChance: true
-			}
-		};
-
-		// not using modalStore.trigger because i need to show this modal on top of the current one
-		modalStore.update((modals) => {
-			modals.unshift({
-				type: 'component',
-				component: modalComponent,
-				title: isFragment ? 'Edit fragment loot tables' : 'Edit disc loot tables',
-				response(r) {
-					if (!r || Object.keys(r).length == 0) return;
-
-					tempDisc[isFragment ? 'fragment-loot-tables' : 'loot-tables'].value = r;
-					tempDisc[isFragment ? 'fragment-loot-tables' : 'loot-tables'].edited = true;
-				}
-			});
-			return modals;
-		});
-	};
-
-	const openArchaeologyModal = (isFragment: boolean) => {
-		$modalStore[0].meta = tempDisc;
-
-		const modalComponent: ModalComponent = {
-			ref: DungeonSelectModal,
-			props: {
-				source: 'archaeology/*',
-				defaultValue: 0,
-				value: isFragment ? tempDisc['fragment-loot-tables'].value : tempDisc['loot-tables'].value,
-				isBoolean: true
 			}
 		};
 
@@ -350,15 +318,6 @@
 		<div class="flex flex-col justify-around gap-4 sm:flex-row items-center mt-4">
 			<MinecraftButton on:click={() => openDungeonModal(false)}>Disc loot table</MinecraftButton>
 			<MinecraftButton on:click={() => openDungeonModal(true)}>Fragment loot table</MinecraftButton>
-		</div>
-
-		<div class="flex flex-col justify-around gap-4 sm:flex-row items-center mt-4">
-			<MinecraftButton on:click={() => openArchaeologyModal(false)}
-				>Disc archaeology loot table</MinecraftButton
-			>
-			<MinecraftButton on:click={() => openArchaeologyModal(true)}
-				>Fragment archaeology loot table</MinecraftButton
-			>
 		</div>
 
 		{#if tempDisc.mono && tempDisc.normalize && tempDisc.quality}

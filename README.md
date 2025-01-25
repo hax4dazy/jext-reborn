@@ -53,7 +53,7 @@ Jext Reborn seamlessly integrates with the following plugins to further enhance 
 - [JukeLooper](https://www.spigotmc.org/resources/jukelooper.72895/): A simple plugin for music looping, playlist setup, and song changes. (waiting for [#3](https://gitlab.com/ranull/minecraft/jukelooper/-/merge_requests/3))
 - [WorldGuard](https://dev.bukkit.org/projects/worldguard): Allows you and players to protect areas of land against griefers and unwanted activities while providing various gameplay tweaks for Minecraft.
 - [GriefPrevention](https://www.spigotmc.org/resources/griefprevention.1884/): Prevents all forms of grief, including building/breaking, theft, spam, spawn camping, and more, without requiring a database.
-- [GeyserMC](https://geysermc.org/): A proxy that allows Minecraft: Bedrock Edition clients to connect to Minecraft: Java Edition servers.
+- [GeyserMC](https://geysermc.org/): A proxy that allows Minecraft: Bedrock Edition clients to connect to Minecraft: Java Edition serverss.
 
 ---
 

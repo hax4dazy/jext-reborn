@@ -57,4 +57,4 @@ Jext Reborn seamlessly integrates with the following plugins to further enhance 
 
 ---
 
->Jext Reborn is the ultimate choice for Minecraft server owners seeking to elevate their music experience by adding custom music discs seamlessly. Explore its vast array of features to create an engaging and unique musical atmosphere on your server.
+>Jext Reborn is the ultimate choice for Minecraft server owners seeking to elevate their music experience by adding custom music discs seamlessly. Explore its vast array of features to create an engaging and unique musical atmosphere on your serverr.
